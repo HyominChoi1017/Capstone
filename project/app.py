@@ -7,6 +7,9 @@ import torch.nn.functional as F
 
 app = Flask(__name__)
 
+@app.routh('/donotsleep', methods=['GET'])
+def health_check():
+    return jsonify({"status": "OK", "message": "Server is running"}), 200
 
 @app.route('/', methods=['GET'])
 def test():
