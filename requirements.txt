@@ -2,3 +2,4 @@ numpy==1.24.4
 performer_pytorch==1.1.4
 torch==2.2.1
 gunicorn
+flask
