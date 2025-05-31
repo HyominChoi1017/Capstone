@@ -246,7 +246,7 @@ class PerformerClassifier(nn.Module):
         x = x.mean(dim=1)  # 간단한 average pooling
         return self.classifier(x)  # (B, num_classes)
 model = PerformerClassifier(input_dim=336, model_dim=256, num_classes=208) 
-model = torch.load("full_model.pth", map_location='cpu')
+model = torch.load("project/full_model.pth", map_location='cpu')
 
 
 @app.route('/test', methods=['GET'])
