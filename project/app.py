@@ -8,7 +8,7 @@ import torch.nn.functional as F
 app = Flask(__name__)
 
 
-@app.route('/test', methods=['GET'])
+@app.route('/', methods=['GET'])
 def test():
     return jsonify({"message": "반갑다. 잘 돌아간다."})
 
