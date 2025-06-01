@@ -21,6 +21,8 @@ def predict():
     data = request.get_json()
     # 데이터를 numpy 배열로 변환
     data_np = np.array(data['data'])
+    print("받은 행렬:")
+    print(data_np)
     prev_result = data['prev_result']
 
     video_np = data_np.copy()  # 데이터 복사
