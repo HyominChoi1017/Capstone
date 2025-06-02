@@ -225,9 +225,9 @@ class PerformerClassifier(nn.Module):
             self.input_proj = nn.Linear(input_dim, model_dim)
             self.performer = Performer(
                 dim=model_dim,
-                dim_head=32,
-                depth=6,
-                heads=8,
+                dim_head=16, #dim_head=32,
+                depth=2, #depth=6,
+                heads=4, #heads=8,
                 causal=False
             )
             self.classifier = nn.Sequential(
