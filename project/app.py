@@ -262,7 +262,7 @@ def predict():
     data = request.get_json()
 
     print("/ai에서 요청을 받았습니다.")
-    print("data:", data_np)
+    print("data:", data['data'])
 
     data_np = np.array(data['data']) 
     prev_result = data['prev_result']
