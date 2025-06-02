@@ -262,7 +262,9 @@ def predict():
     data = request.get_json()
     data_np = np.array(data['data'])
     prev_result = data['prev_result']
-
+    print("/ai에서 요청을 받았습니다.")
+    print("data:", data_np)
+    print("prev_result:", prev_result)
     video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
     torch_data = torch.tensor(video_np, dtype=torch.float32).unsqueeze(0)
     mask = torch.tensor((data_np != 0).any(axis=-1), dtype=torch.bool).unsqueeze(0)
