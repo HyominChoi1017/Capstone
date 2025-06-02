@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from performer_pytorch import Performer
 import torch.nn.functional as F 
+import tracemalloc
 
 app = Flask(__name__)
 
@@ -266,7 +267,12 @@ def predict():
 
         print("data:", data )
 
-        data_np = np.array(data['data']) 
+        tracemalloc.start()  # 메모리 추적 시작
+        data_np = np.array(data['data'], dtype=np.float32) 
+        current, peak = tracemalloc.get_traced_memory()
+        print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
+
         prev_result = data['prev_result']
         print("data_np shape:", data_np.shape)
         print("prev_result:", prev_result)
