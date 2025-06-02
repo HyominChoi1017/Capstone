@@ -259,34 +259,39 @@ def test():
 # POST 요청: JSON Body 받기
 @app.route('/ai', methods=['POST'])
 def predict():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    print("/ai에서 요청을 받았습니다.")
-    print("data:", data['data'])
+        print("/ai에서 요청을 받았습니다.")
 
-    data_np = np.array(data['data']) 
-    prev_result = data['prev_result']
-    print("data_np shape:", data_np.shape)
-    print("prev_result:", prev_result)
-     
-    video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
-    torch_data = torch.tensor(video_np, dtype=torch.float32).unsqueeze(0)
-    mask = torch.tensor((data_np != 0).any(axis=-1), dtype=torch.bool).unsqueeze(0)
+        print("data:", data )
 
-    with torch.no_grad():
-        logits = model(torch_data, mask)
-    probs = F.softmax(logits, dim=-1)
-    max_probs, preds = probs.max(dim=1)
-    threshold = 0.5
-    final_preds = torch.where(max_probs > threshold, preds, torch.tensor(-1))
+        data_np = np.array(data['data']) 
+        prev_result = data['prev_result']
+        print("data_np shape:", data_np.shape)
+        print("prev_result:", prev_result)
+        
+        video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
+        torch_data = torch.tensor(video_np, dtype=torch.float32).unsqueeze(0)
+        mask = torch.tensor((data_np != 0).any(axis=-1), dtype=torch.bool).unsqueeze(0)
 
-    predicted_class = int(final_preds.cpu())
-    predicted_word = decoding_dict.get(predicted_class, '')
+        with torch.no_grad():
+            logits = model(torch_data, mask)
+        probs = F.softmax(logits, dim=-1)
+        max_probs, preds = probs.max(dim=1)
+        threshold = 0.5
+        final_preds = torch.where(max_probs > threshold, preds, torch.tensor(-1))
 
-    if predicted_word != prev_result:
-        return jsonify({"you_sent": predicted_word})
-    else:
-        return jsonify({"you sent":""})  # 변화 없으면 빈 응답
+        predicted_class = int(final_preds.cpu())
+        predicted_word = decoding_dict.get(predicted_class, '')
+
+        if predicted_word != prev_result:
+            return jsonify({"you_sent": predicted_word})
+        else:
+            return jsonify({"you sent":""})  # 변화 없으면 빈 응답
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     # 여기 필요한 변수들을 초기화하면 되건가?
