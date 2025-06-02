@@ -246,8 +246,7 @@ class PerformerClassifier(nn.Module):
             return self.classifier(x)  # (B, num_classes)
         
 model = PerformerClassifier(input_dim=336, model_dim=256, num_classes=208)
-model.load_state_dict(torch.load("project/full_model.pth", map_location='cpu'))
-model.eval()
+
 
 @app.route('/donotsleep', methods=['GET'])
 def health_check():
@@ -286,7 +285,8 @@ def predict():
 if __name__ == '__main__':
     # 여기 필요한 변수들을 초기화하면 되건가?
 
-
+    model.load_state_dict(torch.load("project/full_model.pth", map_location='cpu'))
+    model.eval()
 
     
 
