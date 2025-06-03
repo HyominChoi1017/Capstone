@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 from performer_pytorch import Performer
 import torch.nn.functional as F 
-import tracemalloc, time
+import time
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -265,6 +266,8 @@ def predict():
     try:
         data = request.get_json()
 
+        now = datetime.now()
+        print(now.strftime("%m월 %d일 %H시 %M분"))
         print("/ai에서 요청을 받았습니다.")
 
         print("data:", data.keys(), len(data['data']), len(data['data'][0])) 
