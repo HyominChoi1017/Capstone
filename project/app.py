@@ -331,12 +331,12 @@ def predict():
 
         if predicted_word != prev_result:
             print("predicted_word:", predicted_word)
-            return jsonify({"you_sent": predicted_word})
+            return jsonify({"result": predicted_word})
         else:
             return jsonify({"result":""})  # 변화 없으면 빈 응답
     except Exception as e:
         print("Error:", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"result": str(e)}), 500
 
 if __name__ == '__main__':
     # 여기 필요한 변수들을 초기화하면 되건가?
