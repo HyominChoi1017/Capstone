@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from performer_pytorch import Performer
 import torch.nn.functional as F 
-import tracemalloc
+import tracemalloc, time
 
 app = Flask(__name__)
 
@@ -290,9 +290,12 @@ def predict():
 
         tracemalloc.stop()  # 메모리 추적 중지
         tracemalloc.start()  # 메모리 추적 다시 시작
+        start = time.time()
         with torch.no_grad():
             print("모델에 입력하고 예측 진행")
             logits = model(torch_data, mask)
+        end = time.time()
+        print(f"모델 예측 시간: {end - start:.2f}초")
         probs = F.softmax(logits, dim=-1)
         max_probs, preds = probs.max(dim=1)
         threshold = 0.5
