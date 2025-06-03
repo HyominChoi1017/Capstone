@@ -265,7 +265,7 @@ def predict():
 
         print("/ai에서 요청을 받았습니다.")
 
-        print("data:", data )
+        print("data:", data.keys(), len(data['data']), len(data['data'][0])) 
 
         tracemalloc.start()  # 메모리 추적 시작
         data_np = np.array(data['data'], dtype=np.float32) 
@@ -315,6 +315,7 @@ def predict():
         print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
         if predicted_word != prev_result:
+            print("predicted_word:", predicted_word)
             return jsonify({"you_sent": predicted_word})
         else:
             return jsonify({"you sent":""})  # 변화 없으면 빈 응답
