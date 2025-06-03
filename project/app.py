@@ -286,7 +286,9 @@ def predict():
         torch_data = torch.from_numpy(video_np).unsqueeze(0).float().to(device)  # (1, L, 336)
         mask = torch.from_numpy(data_np).unsqueeze(0).bool().to(device)          # (1, L)
         
-        
+        print("torch_data shape:", torch_data.shape)
+        print("mask shape:", mask.shape)
+        print("모델을 GPU로 이동")
         
         current, peak = tracemalloc.get_traced_memory()
         
