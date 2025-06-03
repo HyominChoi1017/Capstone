@@ -269,11 +269,11 @@ def predict():
 
         print("data:", data.keys(), len(data['data']), len(data['data'][0])) 
 
-        tracemalloc.start()  # 메모리 추적 시작
+        # tracemalloc.start()  # 메모리 추적 시작
         data_np = np.array(data['data'], dtype=np.float32) 
-        current, peak = tracemalloc.get_traced_memory()
-        print(f"현재 메모리: {current / 1024**2:.2f} MB")
-        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
+        # current, peak = tracemalloc.get_traced_memory()
+        # print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        # print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
         prev_result = data['prev_result']
         print("data_np shape:", data_np.shape)
@@ -282,9 +282,8 @@ def predict():
         video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
         
         print("tensor로 바꾸고 masking 진행")
-        tracemalloc.stop()  # 메모리 추적 중지
-        tracemalloc.start()  # 메모리 추적 다시 시작
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # tracemalloc.stop()  # 메모리 추적 중지
+        # tracemalloc.start()  # 메모리 추적 다시 시작 
         torch_data = torch.from_numpy(video_np).unsqueeze(0).float().to(device)  # (1, L, 336)
         # mask = torch.from_numpy(data_np).unsqueeze(0).bool().to(device)          # (1, L)
         mask = torch.tensor((data_np != 0).any(axis=-1)).unsqueeze(0).to(device)  # (1, L)
@@ -292,13 +291,13 @@ def predict():
         print("mask shape:", mask.shape)
         print("모델을 GPU로 이동")
         
-        current, peak = tracemalloc.get_traced_memory()
-        
-        print(f"현재 메모리: {current / 1024**2:.2f} MB")
-        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
+        # current, peak = tracemalloc.get_traced_memory()
+        # print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        # print(f"최대 메모리: {peak / 1024**2:.2f} MB")
+        # tracemalloc.stop()  # 메모리 추적 중지
+        # tracemalloc.start()  # 메모리 추적 다시 시작
 
-        tracemalloc.stop()  # 메모리 추적 중지
-        tracemalloc.start()  # 메모리 추적 다시 시작
+
         start = time.time()
         with torch.no_grad():
             print("모델에 입력하고 예측 진행")
@@ -307,20 +306,24 @@ def predict():
         print(f"모델 예측 시간: {end - start:.2f}초")
         probs = F.softmax(logits, dim=-1)
         max_probs, preds = probs.max(dim=1)
+
         threshold = 0.5
         final_preds = torch.where(max_probs > threshold, preds, torch.tensor(-1))
-
         predicted_class = int(final_preds.cpu())
+
+        del torch_data, mask, logits, probs, max_probs, preds
+        torch.cuda.empty_cache()  # GPU 메모리 해제
+
         predicted_word = decoding_dict.get(predicted_class, '')
-        current, peak = tracemalloc.get_traced_memory()
-        print(f"현재 메모리: {current / 1024**2:.2f} MB")
-        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
+        # current, peak = tracemalloc.get_traced_memory()
+        # print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        # print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
         if predicted_word != prev_result:
             print("predicted_word:", predicted_word)
             return jsonify({"you_sent": predicted_word})
         else:
-            return jsonify({"you sent":""})  # 변화 없으면 빈 응답
+            return jsonify({"result":""})  # 변화 없으면 빈 응답
     except Exception as e:
         print("Error:", e)
         return jsonify({"error": str(e)}), 500
