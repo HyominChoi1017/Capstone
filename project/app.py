@@ -278,10 +278,20 @@ def predict():
         print("prev_result:", prev_result)
         
         video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
+        
+        print("tensor로 바꾸고 masking 진행")
+        tracemalloc.stop()  # 메모리 추적 중지
+        tracemalloc.start()  # 메모리 추적 다시 시작
         torch_data = torch.tensor(video_np, dtype=torch.float32).unsqueeze(0)
         mask = torch.tensor((data_np != 0).any(axis=-1), dtype=torch.bool).unsqueeze(0)
+        current, peak = tracemalloc.get_traced_memory()
+        print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
+        tracemalloc.stop()  # 메모리 추적 중지
+        tracemalloc.start()  # 메모리 추적 다시 시작
         with torch.no_grad():
+            print("모델에 입력하고 예측 진행")
             logits = model(torch_data, mask)
         probs = F.softmax(logits, dim=-1)
         max_probs, preds = probs.max(dim=1)
@@ -290,6 +300,9 @@ def predict():
 
         predicted_class = int(final_preds.cpu())
         predicted_word = decoding_dict.get(predicted_class, '')
+        current, peak = tracemalloc.get_traced_memory()
+        print(f"현재 메모리: {current / 1024**2:.2f} MB")
+        print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
         if predicted_word != prev_result:
             return jsonify({"you_sent": predicted_word})
