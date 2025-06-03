@@ -246,7 +246,9 @@ class PerformerClassifier(nn.Module):
             x = x.mean(dim=1)  # 간단한 average pooling
             return self.classifier(x)  # (B, num_classes)
         
-model = PerformerClassifier(input_dim=336, model_dim=256, num_classes=208)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = PerformerClassifier(input_dim=336, model_dim=256, num_classes=208).to(device)
 
 
 @app.route('/donotsleep', methods=['GET'])
