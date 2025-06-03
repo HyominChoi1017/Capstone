@@ -284,7 +284,7 @@ def predict():
         tracemalloc.start()  # 메모리 추적 다시 시작
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         torch_data = torch.from_numpy(video_np).unsqueeze(0).float().to(device)  # (1, L, 336)
-        mask = torch.from_numpy(video_np).unsqueeze(0).bool().to(device)          # (1, L)
+        mask = torch.from_numpy(data_np).unsqueeze(0).bool().to(device)          # (1, L)
         
         
         
