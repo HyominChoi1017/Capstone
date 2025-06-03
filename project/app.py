@@ -282,7 +282,7 @@ def predict():
 
         prev_result = data['prev_result']
         print("data_np shape:", data_np.shape, " | ", "prev_result:", prev_result) 
-        
+        print('data_np:', data_np)
         video_np = (data_np - np.min(data_np)) / (np.max(data_np) - np.min(data_np) + 1e-6)
          
         torch_data = torch.from_numpy(video_np).unsqueeze(0).float().to(device)  # (1, L, 336) 
