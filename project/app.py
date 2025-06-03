@@ -282,9 +282,14 @@ def predict():
         print("tensor로 바꾸고 masking 진행")
         tracemalloc.stop()  # 메모리 추적 중지
         tracemalloc.start()  # 메모리 추적 다시 시작
-        torch_data = torch.tensor(video_np, dtype=torch.float32).unsqueeze(0)
-        mask = torch.tensor((data_np != 0).any(axis=-1), dtype=torch.bool).unsqueeze(0)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        torch_data = torch.from_numpy(video_np).unsqueeze(0).float().to(device)  # (1, L, 336)
+        mask = torch.from_numpy(video_np).unsqueeze(0).bool().to(device)          # (1, L)
+        
+        
+        
         current, peak = tracemalloc.get_traced_memory()
+        
         print(f"현재 메모리: {current / 1024**2:.2f} MB")
         print(f"최대 메모리: {peak / 1024**2:.2f} MB")
 
