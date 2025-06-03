@@ -222,30 +222,37 @@ decoding_dict = {
 }
 
 class PerformerClassifier(nn.Module):
-        def __init__(self, input_dim, model_dim, num_classes):
-            super().__init__()
-            self.input_proj = nn.Linear(input_dim, model_dim)
-            self.performer = Performer(
-                dim=model_dim,
-                dim_head=32,
-                depth=6,
-                heads=8,
-                causal=False
-            )
-            self.classifier = nn.Sequential(
-                nn.LayerNorm(model_dim),
-                nn.ReLU(),
-                nn.Linear(model_dim, model_dim),
-                nn.ReLU(),
-                nn.Linear(model_dim, num_classes)
-            )
+    def __init__(self, input_dim, model_dim, num_classes):
+        super().__init__()
+        self.cls_token = nn.Parameter(torch.randn(1, 1, model_dim))
+        self.input_proj = nn.Linear(input_dim, model_dim)
+        self.performer = Performer(
+            dim=model_dim,
+            dim_head=64,
+            depth=6,
+            heads=8,
+            nb_features=512, # 랜덤 피쳐 수
+            causal=False
+        )
+        self.classifier = nn.Sequential(
+            nn.LayerNorm(model_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(model_dim, num_classes)
+        )
 
-        def forward(self, x, mask):
-            # x: (B, T, D)
-            x = self.input_proj(x)  # (B, T, model_dim)
-            x = self.performer(x, mask=mask)  # (B, T, model_dim)
-            x = x.mean(dim=1)  # 간단한 average pooling
-            return self.classifier(x)  # (B, num_classes)
+
+    def forward(self, x, mask):
+      B = x.shape[0]
+      x = self.input_proj(x)
+      cls_tokens = self.cls_token.expand(B, -1, -1)  # (B, 1, D)
+      x = torch.cat((cls_tokens, x), dim=1)  # (B, T+1, D)
+      if mask is not None:
+          cls_mask = torch.ones((B, 1), dtype=torch.bool, device=mask.device)
+          mask = torch.cat((cls_mask, mask), dim=1)  # (B, T+1)
+      x = self.performer(x, mask=mask)
+      x = x[:, 0]  # use [CLS] token
+      return self.classifier(x)
         
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
